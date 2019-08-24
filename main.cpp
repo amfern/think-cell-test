@@ -79,11 +79,10 @@ public:
 
     auto end_interval = m_map.lower_bound(keyEnd); // the first entry in the map whose key is >= keyBegin
 
-    insert_res++;
-
-    if (end_interval->second == val)
+    if (end_interval != m_map.end() && end_interval->second == val)
       end_interval++;
 
+    insert_res++;
     // erase intervals in between
     m_map.erase(insert_res, end_interval);
   }
