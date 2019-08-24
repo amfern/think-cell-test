@@ -2,7 +2,7 @@
 # The name of the executable to be created
 BIN_NAME := think-cell-test
 # Compiler used
-CXX ?= g++
+CXX ?= gcc-7
 # Extension of source files used in the project
 SRC_EXT = cpp
 # Path to the source directory, relative to the makefile
