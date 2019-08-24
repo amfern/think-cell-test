@@ -3,6 +3,7 @@
 #include <list>
 #include <map>
 #include <limits>
+#include <iterator>
 // #include <algorithm>
 
 
@@ -29,6 +30,11 @@ public:
     return *this;
   }
 
+  ThinkCellKey operator --(int) {
+    this->v--;
+    return *this;
+  }
+
   friend std::ostream & operator << (std::ostream &out, const ThinkCellKey<T> &c) {
       out << c.v;
       return out;
@@ -51,7 +57,7 @@ public:
   // constructor associates whole range of K with val by inserting (K_min, val)
   // into the map
   interval_map( V const& val) {
-    // m_map.insert(m_map.end(),std::make_pair(std::numeric_limits<K>::lowest(),val));
+    m_map.insert(m_map.end(),std::make_pair(std::numeric_limits<K>::lowest(),val));
   }
 
   // Assign value val to interval [keyBegin, keyEnd).
@@ -64,29 +70,22 @@ public:
     if (!(keyBegin < keyEnd))
       return;
 
-    for (auto i = keyBegin; i < keyEnd; i++) {
-      std::cout << "YYYYYYYYYY" << std::endl;
-      m_map.insert_or_assign(m_map.lower_bound(i), i, val);
-    }
+    // if inserting into range of the same value before, don't insert
+    // if the value existing already after out pointer, erase it
+    auto lBound = m_map.upper_bound(keyBegin);
+    auto before_begin_bound = --(m_map.upper_bound(keyBegin)); // TODO: use lBound to get that iterator
+    auto insert_res = before_begin_bound->second == val ?
+      before_begin_bound : m_map.insert_or_assign(lBound, keyBegin, val);
 
+    auto end_interval = m_map.lower_bound(keyEnd); // the first entry in the map whose key is >= keyBegin
 
-    // auto start = m_map.lower_bound(keyBegin);
-    // auto end = m_map.upper_bound(keyEnd);
+    insert_res++;
 
-    // for (; true; start++) {
-    //   std::cout << start->first << std::endl;
-    //   // m_map.insert_or_assign(start, start->first, val);
-    // }
-    // typename std::map<K,V>::iterator low, up;
+    if (end_interval->second == val)
+      end_interval++;
 
-    // low=std::lower_bound (m_map.begin(), m_map.end(), keyBegin);
-    // up=std::upper_bound (m_map.begin(), m_map.end(), keyEnd);
-
-    // for(i keyBegin, auto entry : m_map) {
-    //   m_map.insert_or_assign(entry);
-    // }
-
-
+    // erase intervals in between
+    m_map.erase(insert_res, end_interval);
   }
 
   // look-up of the value associated with key
@@ -114,11 +113,27 @@ int main(int argc, char* argv[])
 {
   // TODO: test interval map with different stl algorithm methods
   // TODO: make 4 spaces tab
-  interval_map<ThinkCellKey<unsigned int>, char> imap {'a'};
+  // interval_map<ThinkCellKey<unsigned int>, char> imap {'a'};
+  interval_map<unsigned int, char> imap {'A'};
 
-  imap.assign(ThinkCellKey<unsigned int> { 1 }, ThinkCellKey<unsigned int> { 3 }, 'B');
-  // imap.assign(3, 5, 'C');
-  // imap.assign(3, 5, 'D');
+  // imap.assign(3, 5, 'B');
+  // imap.assign(5, 7, 'C');
+  // imap.assign(2, 7, 'D');
+
+
+  imap.assign(8, 10, 'k');
+
+  imap.assign(8, 12, 'k');
+	imap.assign(2, 12, 'k');
+	imap.assign(2, 12, 'b');
+	imap.assign(5, 12, 'b');
+	imap.assign(4, 10, 'b');
+	imap.assign(4, 12, 'b');
+	imap.assign(7, 13, 'a');
+
+
+	// imap.assign(0, 10, 'e');
+	// imap.assign(0, 10, 'e');
 
   imap.show();
   return 0;
