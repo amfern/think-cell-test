@@ -72,19 +72,22 @@ public:
 
     // if inserting into range of the same value before, don't insert
     // if the value existing already after out pointer, erase it
-    auto lBound = m_map.upper_bound(keyBegin);
-    auto before_begin_bound = --(m_map.upper_bound(keyBegin)); // TODO: use lBound to get that iterator
+    auto before_begin_bound = --(m_map.upper_bound(keyBegin));
     auto insert_res = before_begin_bound->second == val ?
-      before_begin_bound : m_map.insert_or_assign(lBound, keyBegin, val);
+      before_begin_bound : m_map.insert_or_assign(before_begin_bound, keyBegin, val);
 
-    auto end_interval = m_map.lower_bound(keyEnd); // the first entry in the map whose key is >= keyBegin
+    auto end_interval = m_map.lower_bound(keyEnd);
 
     if (end_interval != m_map.end() && end_interval->second == val)
       end_interval++;
 
     insert_res++;
-    // erase intervals in between
     m_map.erase(insert_res, end_interval);
+
+    if (end_interval == m_map.end())
+      this->assign(keyEnd, std::numeric_limits<K>::max(), before_begin_bound->second);
+    else
+      this->assign(keyEnd, end_interval->first, before_begin_bound->second);
   }
 
   // look-up of the value associated with key
@@ -120,7 +123,7 @@ int main(int argc, char* argv[])
   // imap.assign(2, 7, 'D');
 
 
-  imap.assign(8, 10, 'k');
+  // imap.assign(8, 10, 'k');
 
   imap.assign(8, 12, 'k');
 	imap.assign(2, 12, 'k');
@@ -128,11 +131,17 @@ int main(int argc, char* argv[])
 	imap.assign(5, 12, 'b');
 	imap.assign(4, 10, 'b');
 	imap.assign(4, 12, 'b');
-	imap.assign(7, 13, 'a');
+	imap.assign(8, 13, 'a');
+  imap.assign(6, 9, 'j');
 
 
+  // imap.assign(4, 4, 'j'); // its ok 
 	// imap.assign(0, 10, 'e');
 	// imap.assign(0, 10, 'e');
+
+  // imap.assign(2,6, 'B');
+  // imap.assign(3,10, 'C');
+  // imap.assign(4, 7, 'B');
 
   imap.show();
   return 0;
