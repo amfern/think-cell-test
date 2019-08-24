@@ -72,7 +72,10 @@ public:
 
     // if inserting into range of the same value before, don't insert
     // if the value existing already after out pointer, erase it
-    auto before_begin_bound = --(m_map.lower_bound(keyBegin));
+    auto before_begin_bound = m_map.lower_bound(keyBegin);
+    if (before_begin_bound != m_map.begin()) {
+      --before_begin_bound;
+    }
     auto insert_res = before_begin_bound->second == val ?
       before_begin_bound : m_map.insert_or_assign(before_begin_bound, keyBegin, val);
 
