@@ -6,6 +6,43 @@
 // #include <algorithm>
 
 
+template<typename T>
+class ThinkCellKey : std::numeric_limits<T>{
+	T v;
+
+public:
+  ThinkCellKey( T const& val) {
+    v = val;
+  }
+
+  // inline bool operator< (const ThinkCellKey & s1, const ThinkCellKey & s2) {
+  //   return  s1.v < s2.v;
+  // }
+
+  // overloaded < operator
+  bool operator <(const ThinkCellKey& d) const {
+    return v < d.v;
+  }
+
+  ThinkCellKey operator ++(int) {
+    this->v++;
+    return *this;
+  }
+
+  friend std::ostream & operator << (std::ostream &out, const ThinkCellKey<T> &c) {
+      out << c.v;
+      return out;
+  }
+
+  static const ThinkCellKey<T> lowest() {
+    return std::numeric_limits<T>::lowest();
+  }
+
+  // ThinkCellKey& operator= (const ThinkCellKey&) {
+  //   return *this;
+  // }
+};
+
 template<typename K, typename V>
 class interval_map {
 	std::map<K,V> m_map;
@@ -14,7 +51,7 @@ public:
   // constructor associates whole range of K with val by inserting (K_min, val)
   // into the map
   interval_map( V const& val) {
-    m_map.insert(m_map.end(),std::make_pair(std::numeric_limits<K>::lowest(),val));
+    // m_map.insert(m_map.end(),std::make_pair(std::numeric_limits<K>::lowest(),val));
   }
 
   // Assign value val to interval [keyBegin, keyEnd).
@@ -24,13 +61,14 @@ public:
   // If !( keyBegin < keyEnd ), this designates an empty interval,
   // and assign must do nothing.
   void assign( K const& keyBegin, K const& keyEnd, V const& val ) {
-    if (keyBegin > keyEnd)
+    if (!(keyBegin < keyEnd))
       return;
 
-
     for (auto i = keyBegin; i < keyEnd; i++) {
+      std::cout << "YYYYYYYYYY" << std::endl;
       m_map.insert_or_assign(m_map.lower_bound(i), i, val);
     }
+
 
     // auto start = m_map.lower_bound(keyBegin);
     // auto end = m_map.upper_bound(keyEnd);
@@ -76,10 +114,10 @@ int main(int argc, char* argv[])
 {
   // TODO: test interval map with different stl algorithm methods
   // TODO: make 4 spaces tab
-  interval_map<unsigned int, char> imap {'a'};
+  interval_map<ThinkCellKey<unsigned int>, char> imap {'a'};
 
-  imap.assign(1, 3, 'B');
-  imap.assign(3, 5, 'C');
+  imap.assign(ThinkCellKey<unsigned int> { 1 }, ThinkCellKey<unsigned int> { 3 }, 'B');
+  // imap.assign(3, 5, 'C');
   // imap.assign(3, 5, 'D');
 
   imap.show();
